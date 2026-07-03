@@ -35,6 +35,7 @@ let pendingDishImage = "";
 let cloudBusy = false;
 let cloudInitialized = false;
 let cloudPollTimer = null;
+let draftDirty = false;
 
 function loadState() {
   try {
@@ -144,6 +145,7 @@ function renderAdmin() {
   document.querySelectorAll(".admin-dish").forEach(card => card.addEventListener("click", () => {
     const id = resolveDishId(card.dataset.id);
     state.draftMenu = state.draftMenu.includes(id) ? state.draftMenu.filter(item => item !== id) : [...state.draftMenu, id];
+    draftDirty = true;
     saveState();
     renderAdmin();
   }));
@@ -314,6 +316,7 @@ async function publishMenu() {
     cloudBusy = true;
     try {
       await KitchenCloud.publishMenu(state.draftMenu);
+      draftDirty = false;
       await reloadCloudState();
       toast(`今日菜单已同步，共 ${state.todayMenu.length} 道菜`);
     } catch (error) {
@@ -329,6 +332,7 @@ async function publishMenu() {
   state.submission = null;
   state.status = "open";
   state.statusUpdatedAt = new Date().toISOString();
+  draftDirty = false;
   saveState();
   renderAll();
   toast(`今日菜单发布啦，共 ${state.todayMenu.length} 道菜`);
@@ -553,11 +557,15 @@ async function reloadCloudState(fromRealtime = false) {
   const previousSubmissionTime = state.submission?.time || null;
   const previousSelected = [...state.selected];
   const previousNote = state.note;
+  const previousDraftMenu = [...state.draftMenu];
   try {
     const remoteState = await KitchenCloud.fetchState();
     state = {
       ...state,
       ...remoteState,
+      draftMenu: draftDirty
+        ? previousDraftMenu.filter(id => remoteState.dishes.some(dish => String(dish.id) === String(id)))
+        : remoteState.draftMenu,
       selected: previousSelected.filter(id => remoteState.todayMenu.some(menuId => String(menuId) === String(id))),
       note: previousNote
     };

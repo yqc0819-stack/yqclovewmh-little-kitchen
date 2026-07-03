@@ -39,6 +39,8 @@ Assert-Contains "图片" "删除菜品时清理照片" $cloud 'await deleteStore
 Assert-Contains "发布" "今日菜单选择区" $html 'id="admin-dish-grid"'
 Assert-Contains "发布" "发布按钮" $html 'id="publish-menu"'
 Assert-Contains "发布" "发布逻辑" $app 'function publishMenu'
+Assert-Contains "发布" "未发布草稿防覆盖" $app 'let draftDirty = false'
+Assert-Contains "发布" "草稿修改状态" $app 'draftDirty = true'
 
 Assert-Contains "点餐" "菜品选择逻辑" $app 'function toggleDinerDish'
 Assert-Contains "点餐" "口味备注" $html 'id="taste-note"'
