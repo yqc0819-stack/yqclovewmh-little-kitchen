@@ -95,6 +95,7 @@
       .on("postgres_changes", { event: "*", schema: "public", table: "menu_items" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "selections" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "selection_items" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "household_messages" }, refresh)
       .subscribe(status => {
         if (status === "SUBSCRIBED") refresh();
       });
@@ -102,7 +103,7 @@
 
   async function fetchState() {
     if (!currentProfile) throw new Error("请先登录家庭账号");
-    const [dishResponse, menuResponse] = await Promise.all([
+    const [dishResponse, menuResponse, profileResponse] = await Promise.all([
       requireClient()
         .from("dishes")
         .select("id, name, category, description, image_url, emoji, created_at")
@@ -116,10 +117,15 @@
         `)
         .eq("household_id", currentProfile.household_id)
         .order("menu_date", { ascending: false })
-        .limit(30)
+        .limit(30),
+      requireClient()
+        .from("profiles")
+        .select("user_id, role, nickname")
+        .eq("household_id", currentProfile.household_id)
     ]);
     if (dishResponse.error) throw dishResponse.error;
     if (menuResponse.error) throw menuResponse.error;
+    if (profileResponse.error) throw profileResponse.error;
 
     const dishes = (dishResponse.data || []).map(dish => ({
       id: dish.id,
@@ -142,6 +148,35 @@
       selections = selectionResponse.data || [];
     }
     const selectionByMenu = new Map(selections.map(selection => [selection.menu_id, selection]));
+    const familyProfiles = profileResponse.data || [];
+    const profileByUser = new Map(familyProfiles.map(profile => [profile.user_id, profile]));
+    let messages = [];
+    let chatAvailable = true;
+    const messageResponse = await requireClient()
+      .from("household_messages")
+      .select("id, sender_id, body, created_at")
+      .eq("household_id", currentProfile.household_id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (messageResponse.error) {
+      if (
+        ["42P01", "PGRST205"].includes(messageResponse.error.code)
+        || /household_messages.*(?:does not exist|schema cache)/i.test(messageResponse.error.message || "")
+      ) {
+        chatAvailable = false;
+      } else {
+        throw messageResponse.error;
+      }
+    } else {
+      messages = (messageResponse.data || []).reverse().map(message => ({
+        id: message.id,
+        senderId: message.sender_id,
+        senderName: profileByUser.get(message.sender_id)?.nickname || "家里人",
+        senderRole: profileByUser.get(message.sender_id)?.role || "diner",
+        body: message.body,
+        time: message.created_at
+      }));
+    }
     const todayMenu = menus.find(menu => menu.menu_date === todayString()) || null;
     const todaySelection = todayMenu ? selectionByMenu.get(todayMenu.id) || null : null;
     currentMenuId = todayMenu?.id || null;
@@ -169,7 +204,9 @@
       } : null,
       status: todaySelection && todayMenu?.status === "open" ? "submitted" : (todayMenu?.status || "open"),
       statusUpdatedAt: todayMenu?.status_updated_at || null,
-      history
+      history,
+      messages,
+      chatAvailable
     };
   }
 
@@ -336,6 +373,18 @@
     if (error) throw error;
   }
 
+  async function sendMessage(body) {
+    const message = String(body || "").trim();
+    if (!message) throw new Error("先写点想说的话吧");
+    if (message.length > 500) throw new Error("一条消息最多 500 个字");
+    const { error } = await requireClient().from("household_messages").insert({
+      household_id: currentProfile.household_id,
+      sender_id: currentProfile.user_id,
+      body: message
+    });
+    if (error) throw error;
+  }
+
   root.KitchenCloud = {
     initialize,
     login,
@@ -347,6 +396,7 @@
     publishMenu,
     submitChoice,
     setStatus,
+    sendMessage,
     get profile() { return currentProfile; },
     get ready() { return Boolean(client && currentProfile); }
   };

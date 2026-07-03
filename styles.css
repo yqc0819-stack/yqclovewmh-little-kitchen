@@ -248,6 +248,29 @@ dialog::backdrop { background:rgba(31,39,34,.42); backdrop-filter:blur(4px); }
 .remove-image-btn { margin-top:8px; padding:0; border:0; background:transparent; color:#c46755; font-size:10px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
 .field-hint { display:block; margin-top:6px; font-size:9px; color:#a89c91; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.chat-fab { position:fixed; right:24px; bottom:24px; z-index:32; width:58px; height:58px; border:3px solid #fff8ef; border-radius:22px 18px 24px 17px; background:#ef9572; color:white; font-size:24px; cursor:pointer; box-shadow:0 8px 0 #d9785a,0 14px 32px rgba(109,65,43,.24); }
+.chat-fab:hover { transform:translateY(-2px) rotate(-2deg); }
+.chat-unread { position:absolute; right:-2px; top:-3px; width:13px; height:13px; border:3px solid #fff8ef; border-radius:50%; background:#e34f3c; }
+.chat-panel { position:fixed; right:24px; bottom:98px; z-index:31; width:min(390px,calc(100vw - 24px)); height:min(590px,calc(100vh - 125px)); padding:20px; border:3px solid #f0dccc; border-radius:28px 22px 30px 20px; background:#fffaf3; box-shadow:0 16px 0 rgba(229,196,170,.38),0 28px 65px rgba(91,57,37,.2); }
+.chat-head { display:flex; justify-content:space-between; align-items:start; padding-bottom:13px; border-bottom:1px dashed #e5cdbb; }
+.chat-head h2 { margin:0; font-family:"ZCOOL KuaiLe","Microsoft YaHei",sans-serif; font-weight:400; font-size:24px; }
+.chat-head .eyebrow { margin-bottom:4px; }
+.chat-close { width:34px; height:34px; border:0; border-radius:50%; background:#f1e6da; cursor:pointer; font-size:21px; }
+.chat-setup { margin:12px 0; padding:10px 12px; border-radius:12px; background:#fff0e9; color:#bd5f4c; font-size:11px; line-height:1.6; }
+.chat-messages { height:calc(100% - 118px); padding:15px 3px 10px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.chat-empty { margin:auto; text-align:center; color:#9d8a7a; font-size:11px; }
+.chat-empty span { display:block; font-size:34px; margin-bottom:8px; }
+.chat-message { max-width:82%; align-self:flex-start; }
+.chat-message.mine { align-self:flex-end; }
+.chat-meta { display:flex; gap:7px; align-items:center; margin:0 7px 4px; color:#9c897a; font-size:9px; }
+.chat-message.mine .chat-meta { justify-content:flex-end; }
+.chat-bubble { margin:0; padding:10px 12px; border-radius:16px 16px 16px 5px; background:#f0e8dc; color:#44352c; font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+.chat-message.mine .chat-bubble { border-radius:16px 16px 5px 16px; background:#dcebdc; }
+.chat-form { display:grid; grid-template-columns:1fr auto; gap:8px; padding-top:10px; border-top:1px dashed #e5cdbb; }
+.chat-form input { min-width:0; padding:11px 13px; border:1px solid #dfcbbb; border-radius:14px; outline:none; background:white; }
+.chat-form input:focus { border-color:#6b9c7c; box-shadow:0 0 0 3px rgba(107,156,124,.13); }
+.chat-form button { border:0; border-radius:13px; padding:0 16px; background:var(--green); color:white; cursor:pointer; }
+.chat-form button:disabled,.chat-form input:disabled { opacity:.5; cursor:not-allowed; }
 #library-dialog { width:min(680px,calc(100vw - 30px)); }
 .library-manage { padding:28px; }
 .library-manage-summary { display:flex; justify-content:space-between; align-items:center; gap:16px; margin:-4px 0 16px; padding:12px 15px; border:1px dashed #e5cdbd; border-radius:14px; background:#fff8ef; color:var(--muted); }
@@ -337,6 +360,8 @@ dialog::backdrop { background:rgba(31,39,34,.42); backdrop-filter:blur(4px); }
   .dish-card .check { top:50%; right:7px; transform:translateY(-50%); width:31px; height:31px; background:var(--green); color:white; }
   .dish-card .check::before { color:white; }
   .dish-card.selected .check { transform:translateY(-50%) scale(.94); }
+  .chat-fab { right:13px; bottom:14px; width:54px; height:54px; }
+  .chat-panel { right:8px; bottom:78px; width:calc(100vw - 16px); height:min(600px,calc(100vh - 90px)); border-radius:24px 19px 25px 18px; }
   .quick-notes { overflow-x:auto; padding-bottom:3px; }
   .quick-notes span { display:none; }
   .quick-notes button { white-space:nowrap; }

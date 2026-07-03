@@ -199,6 +199,26 @@
     </div>
   </dialog>
 
+  <button class="chat-fab hidden" id="chat-toggle" type="button" aria-label="打开家庭对话" aria-expanded="false">
+    <span aria-hidden="true">💬</span>
+    <i class="chat-unread hidden" id="chat-unread"></i>
+  </button>
+
+  <aside class="chat-panel hidden" id="chat-panel" aria-label="家庭实时对话">
+    <div class="chat-head">
+      <div><p class="eyebrow">FAMILY CHAT</p><h2>厨房悄悄话</h2></div>
+      <button class="chat-close" id="chat-close" type="button" aria-label="关闭家庭对话">×</button>
+    </div>
+    <p class="chat-setup hidden" id="chat-setup">聊天功能尚未启用，请先在 Supabase 运行 chat-upgrade.sql。</p>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-empty"><span>♡</span><p>说句话吧，今晚吃饭也要有点仪式感。</p></div>
+    </div>
+    <form class="chat-form" id="chat-form">
+      <input id="chat-input" name="message" maxlength="500" autocomplete="off" placeholder="比如：我晚十分钟到家">
+      <button type="submit">发送</button>
+    </form>
+  </aside>
+
   <div class="auth-screen hidden" id="auth-screen">
     <div class="auth-card">
       <span class="auth-mascot" aria-hidden="true">🍳</span>
@@ -219,7 +239,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260703-3"></script>
   <script src="state-helpers.js"></script>
-  <script src="cloud-adapter.js?v=20260703-7"></script>
-  <script src="app.js?v=20260703-8"></script>
+  <script src="cloud-adapter.js?v=20260703-9"></script>
+  <script src="app.js?v=20260703-9"></script>
 </body>
 </html>

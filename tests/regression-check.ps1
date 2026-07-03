@@ -71,6 +71,11 @@ Assert-Contains "云端" "实时掉线补同步" $app 'function startCloudPollin
 Assert-Contains "云端" "回到页面立即同步" $app 'visibilitychange'
 Assert-Contains "云端" "登录界面" $html 'id="auth-screen"'
 Assert-Contains "云端" "六位密码登录" $html 'minlength="6"'
+Assert-Contains "聊天" "家庭聊天窗口" $html 'id="chat-panel"'
+Assert-Contains "聊天" "消息输入框" $html 'id="chat-input"'
+Assert-Contains "聊天" "发送消息逻辑" $cloud 'async function sendMessage'
+Assert-Contains "聊天" "消息实时订阅" $cloud 'table: "household_messages"'
+Assert-Contains "聊天" "未读消息提醒" $app 'chatUnread = true'
 Assert-Contains "入口" "点餐端切换" $html 'data-view="diner"'
 Assert-Contains "入口" "管理端切换" $html 'data-view="admin"'
 

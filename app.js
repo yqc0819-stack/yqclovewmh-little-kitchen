@@ -21,6 +21,8 @@ const initialState = {
   submission: null,
   status: "open",
   statusUpdatedAt: null,
+  messages: [],
+  chatAvailable: false,
   history: [
     { date: "2026-07-01", dishIds: [7, 4, 5], note: "鸡翅多留两个" },
     { date: "2026-06-29", dishIds: [6, 2], note: "咖喱不要太辣" },
@@ -36,6 +38,8 @@ let cloudBusy = false;
 let cloudInitialized = false;
 let cloudPollTimer = null;
 let draftDirty = false;
+let chatOpen = false;
+let chatUnread = false;
 
 function loadState() {
   try {
@@ -310,6 +314,68 @@ function renderHistory() {
   }).join("") || "<p class='muted'>还没有历史菜单</p>";
 }
 
+function renderChat() {
+  const toggle = document.getElementById("chat-toggle");
+  const panel = document.getElementById("chat-panel");
+  const unread = document.getElementById("chat-unread");
+  const setup = document.getElementById("chat-setup");
+  const input = document.getElementById("chat-input");
+  const submit = document.querySelector("#chat-form button");
+  const messages = document.getElementById("chat-messages");
+  const loggedIn = KitchenCloud.ready;
+  toggle.classList.toggle("hidden", !loggedIn);
+  panel.classList.toggle("hidden", !loggedIn || !chatOpen);
+  toggle.setAttribute("aria-expanded", String(loggedIn && chatOpen));
+  unread.classList.toggle("hidden", !chatUnread || chatOpen);
+  setup.classList.toggle("hidden", state.chatAvailable);
+  input.disabled = !state.chatAvailable;
+  submit.disabled = !state.chatAvailable;
+
+  if (!state.messages.length) {
+    messages.innerHTML = `<div class="chat-empty"><span>♡</span><p>${state.chatAvailable ? "说句话吧，今晚吃饭也要有点仪式感。" : "运行聊天升级脚本后，就能在这里实时说话啦。"}</p></div>`;
+  } else {
+    messages.innerHTML = state.messages.map(message => {
+      const mine = String(message.senderId) === String(KitchenCloud.profile?.user_id);
+      return `<article class="chat-message ${mine ? "mine" : ""}">
+        <div class="chat-meta"><strong>${escapeHtml(message.senderName)}</strong><span>${formatTime(message.time)}</span></div>
+        <p class="chat-bubble">${escapeHtml(message.body)}</p>
+      </article>`;
+    }).join("");
+  }
+  if (chatOpen) {
+    chatUnread = false;
+    unread.classList.add("hidden");
+    requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
+  }
+}
+
+function setChatOpen(open) {
+  chatOpen = open;
+  if (open) chatUnread = false;
+  renderChat();
+  if (open && state.chatAvailable) document.getElementById("chat-input").focus();
+}
+
+async function sendChatMessage(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const input = document.getElementById("chat-input");
+  const message = input.value.trim();
+  if (!message || !KitchenCloud.ready || !state.chatAvailable) return;
+  const button = form.querySelector("button");
+  button.disabled = true;
+  try {
+    await KitchenCloud.sendMessage(message);
+    input.value = "";
+    await reloadCloudState();
+    renderChat();
+  } catch (error) {
+    toast(`消息发送失败：${friendlyCloudError(error)}`);
+  } finally {
+    button.disabled = !state.chatAvailable;
+  }
+}
+
 async function publishMenu() {
   if (KitchenCloud.ready) {
     if (cloudBusy) return;
@@ -555,6 +621,7 @@ function friendlyCloudError(error) {
 async function reloadCloudState(fromRealtime = false) {
   if (!KitchenCloud.ready) return;
   const previousSubmissionTime = state.submission?.time || null;
+  const previousLastMessageId = state.messages?.[state.messages.length - 1]?.id || null;
   const previousSelected = [...state.selected];
   const previousNote = state.note;
   const previousDraftMenu = [...state.draftMenu];
@@ -569,7 +636,16 @@ async function reloadCloudState(fromRealtime = false) {
       selected: previousSelected.filter(id => remoteState.todayMenu.some(menuId => String(menuId) === String(id))),
       note: previousNote
     };
+    const latestMessage = state.messages?.[state.messages.length - 1] || null;
+    const receivedMessage = Boolean(
+      fromRealtime &&
+      latestMessage &&
+      latestMessage.id !== previousLastMessageId &&
+      String(latestMessage.senderId) !== String(KitchenCloud.profile?.user_id)
+    );
+    if (receivedMessage && !chatOpen) chatUnread = true;
     renderAll();
+    if (receivedMessage) toast(`${latestMessage.senderName} 发来一条厨房悄悄话`);
     if (
       fromRealtime &&
       KitchenCloud.profile?.role === "cook" &&
@@ -606,6 +682,7 @@ function applyCloudProfile(profile) {
   status.textContent = `${profile.nickname || (profile.role === "cook" ? "做饭人" : "点餐人")} · 已同步`;
   status.className = "cloud-status online";
   switchView(profile.role === "cook" ? "admin" : "diner");
+  document.getElementById("chat-toggle").classList.remove("hidden");
   startCloudPolling();
 }
 
@@ -645,6 +722,7 @@ async function initializeCloud() {
 function renderAll() {
   renderDiner();
   renderAdmin();
+  renderChat();
 }
 
 document.querySelectorAll(".switch-btn").forEach(btn => btn.addEventListener("click", () => switchView(btn.dataset.view)));
@@ -729,7 +807,9 @@ document.getElementById("login-form").addEventListener("submit", async event => 
 });
 document.getElementById("logout-btn").addEventListener("click", async () => {
   stopCloudPolling();
+  setChatOpen(false);
   await KitchenCloud.logout();
+  document.getElementById("chat-toggle").classList.add("hidden");
   document.getElementById("logout-btn").classList.add("hidden");
   document.getElementById("cloud-status").textContent = "等待登录";
   showLogin();
@@ -742,6 +822,9 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("focus", () => {
   if (KitchenCloud.ready && !cloudBusy) reloadCloudState(true);
 });
+document.getElementById("chat-toggle").addEventListener("click", () => setChatOpen(!chatOpen));
+document.getElementById("chat-close").addEventListener("click", () => setChatOpen(false));
+document.getElementById("chat-form").addEventListener("submit", sendChatMessage);
 
 renderAll();
 initializeCloud();
