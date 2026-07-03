@@ -1,0 +1,5 @@
+assets/anime-kitchen-hero.png
+assets/chibi-kitchen-hero-v2.png
+.env
+.env.*
+!.env.example
