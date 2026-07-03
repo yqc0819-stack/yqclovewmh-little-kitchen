@@ -68,6 +68,7 @@ Assert-Contains "云端" "实时刷新入口" $app 'reloadCloudState(true)'
 Assert-Contains "云端" "实时掉线补同步" $app 'function startCloudPolling'
 Assert-Contains "云端" "回到页面立即同步" $app 'visibilitychange'
 Assert-Contains "云端" "登录界面" $html 'id="auth-screen"'
+Assert-Contains "云端" "六位密码登录" $html 'minlength="6"'
 Assert-Contains "入口" "点餐端切换" $html 'data-view="diner"'
 Assert-Contains "入口" "管理端切换" $html 'data-view="admin"'
 
