@@ -6,8 +6,12 @@ create table if not exists public.household_messages (
   household_id uuid not null references public.households(id) on delete cascade,
   sender_id uuid not null references auth.users(id) on delete cascade,
   body text not null check (char_length(body) between 1 and 500),
+  recalled_at timestamptz,
   created_at timestamptz not null default now()
 );
+
+alter table public.household_messages
+add column if not exists recalled_at timestamptz;
 
 create index if not exists household_messages_household_time_idx
 on public.household_messages (household_id, created_at);
@@ -28,6 +32,23 @@ with check (
 );
 
 grant select, insert on public.household_messages to authenticated;
+revoke update on public.household_messages from authenticated;
+grant update (recalled_at) on public.household_messages to authenticated;
+
+drop policy if exists "sender recalls recent message" on public.household_messages;
+create policy "sender recalls recent message"
+on public.household_messages for update to authenticated
+using (
+  household_id = public.current_household_id()
+  and sender_id = auth.uid()
+  and recalled_at is null
+  and created_at >= now() - interval '2 minutes'
+)
+with check (
+  household_id = public.current_household_id()
+  and sender_id = auth.uid()
+  and recalled_at is not null
+);
 
 do $$
 begin

@@ -154,7 +154,7 @@
     let chatAvailable = true;
     const messageResponse = await requireClient()
       .from("household_messages")
-      .select("id, sender_id, body, created_at")
+      .select("id, sender_id, body, recalled_at, created_at")
       .eq("household_id", currentProfile.household_id)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -174,6 +174,7 @@
         senderName: profileByUser.get(message.sender_id)?.nickname || "家里人",
         senderRole: profileByUser.get(message.sender_id)?.role || "diner",
         body: message.body,
+        recalledAt: message.recalled_at,
         time: message.created_at
       }));
     }
@@ -385,6 +386,18 @@
     if (error) throw error;
   }
 
+  async function recallMessage(id) {
+    const { data, error } = await requireClient()
+      .from("household_messages")
+      .update({ recalled_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("household_id", currentProfile.household_id)
+      .eq("sender_id", currentProfile.user_id)
+      .select("id")
+      .single();
+    if (error || !data) throw new Error("消息只能由发送者在 2 分钟内撤回");
+  }
+
   root.KitchenCloud = {
     initialize,
     login,
@@ -397,6 +410,7 @@
     submitChoice,
     setStatus,
     sendMessage,
+    recallMessage,
     get profile() { return currentProfile; },
     get ready() { return Boolean(client && currentProfile); }
   };

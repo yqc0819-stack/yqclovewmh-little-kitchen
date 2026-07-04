@@ -2,6 +2,7 @@ const STORAGE_KEY = "our-little-kitchen-v1";
 const categoryOrder = ["全部", "荤菜", "素菜", "汤类", "主食", "甜品"];
 const categoryIcons = { "全部": "♡", "荤菜": "🍖", "素菜": "🥬", "汤类": "🥣", "主食": "🍚", "甜品": "🍮" };
 const palettes = ["#f1d9c5", "#dce7d6", "#ead9cc", "#d9e5e6", "#eee2c5", "#e6d8e4"];
+const chatEmojis = ["😀", "😄", "😂", "🥰", "😘", "😋", "🤔", "😭", "🥺", "😤", "😴", "🙈", "👍", "👏", "🙏", "❤️", "🎉", "🌹", "🍚", "🍗", "🍲"];
 
 const initialState = {
   dishes: [
@@ -40,6 +41,7 @@ let cloudPollTimer = null;
 let draftDirty = false;
 let chatOpen = false;
 let chatUnread = false;
+let emojiOpen = false;
 
 function loadState() {
   try {
@@ -320,8 +322,10 @@ function renderChat() {
   const unread = document.getElementById("chat-unread");
   const setup = document.getElementById("chat-setup");
   const input = document.getElementById("chat-input");
-  const submit = document.querySelector("#chat-form button");
+  const submit = document.querySelector("#chat-form .chat-send");
   const messages = document.getElementById("chat-messages");
+  const emojiPicker = document.getElementById("emoji-picker");
+  const emojiToggle = document.getElementById("emoji-toggle");
   const loggedIn = KitchenCloud.ready;
   toggle.classList.toggle("hidden", !loggedIn);
   panel.classList.toggle("hidden", !loggedIn || !chatOpen);
@@ -330,15 +334,26 @@ function renderChat() {
   setup.classList.toggle("hidden", state.chatAvailable);
   input.disabled = !state.chatAvailable;
   submit.disabled = !state.chatAvailable;
+  emojiToggle.disabled = !state.chatAvailable;
+  emojiPicker.classList.toggle("hidden", !chatOpen || !emojiOpen || !state.chatAvailable);
+  emojiToggle.setAttribute("aria-expanded", String(chatOpen && emojiOpen && state.chatAvailable));
+  emojiPicker.innerHTML = chatEmojis.map(emoji =>
+    `<button type="button" data-emoji="${emoji}" aria-label="发送表情 ${emoji}">${emoji}</button>`
+  ).join("");
 
   if (!state.messages.length) {
     messages.innerHTML = `<div class="chat-empty"><span>♡</span><p>${state.chatAvailable ? "说句话吧，今晚吃饭也要有点仪式感。" : "运行聊天升级脚本后，就能在这里实时说话啦。"}</p></div>`;
   } else {
     messages.innerHTML = state.messages.map(message => {
       const mine = String(message.senderId) === String(KitchenCloud.profile?.user_id);
+      const recalled = Boolean(message.recalledAt);
+      const canRecall = mine && !recalled && Date.now() - new Date(message.time).getTime() <= 2 * 60 * 1000;
       return `<article class="chat-message ${mine ? "mine" : ""}">
         <div class="chat-meta"><strong>${escapeHtml(message.senderName)}</strong><span>${formatTime(message.time)}</span></div>
-        <p class="chat-bubble">${escapeHtml(message.body)}</p>
+        ${recalled
+          ? `<p class="chat-recalled">${mine ? "你" : escapeHtml(message.senderName)}撤回了一条消息</p>`
+          : `<p class="chat-bubble">${escapeHtml(message.body)}</p>`}
+        ${canRecall ? `<button class="chat-recall" type="button" data-recall-id="${message.id}">撤回</button>` : ""}
       </article>`;
     }).join("");
   }
@@ -351,6 +366,7 @@ function renderChat() {
 
 function setChatOpen(open) {
   chatOpen = open;
+  if (!open) emojiOpen = false;
   if (open) chatUnread = false;
   renderChat();
   if (open && state.chatAvailable) document.getElementById("chat-input").focus();
@@ -362,17 +378,39 @@ async function sendChatMessage(event) {
   const input = document.getElementById("chat-input");
   const message = input.value.trim();
   if (!message || !KitchenCloud.ready || !state.chatAvailable) return;
-  const button = form.querySelector("button");
+  const button = form.querySelector(".chat-send");
   button.disabled = true;
   try {
     await KitchenCloud.sendMessage(message);
     input.value = "";
+    emojiOpen = false;
     await reloadCloudState();
     renderChat();
   } catch (error) {
     toast(`消息发送失败：${friendlyCloudError(error)}`);
   } finally {
     button.disabled = !state.chatAvailable;
+  }
+}
+
+function insertChatEmoji(emoji) {
+  const input = document.getElementById("chat-input");
+  const start = input.selectionStart ?? input.value.length;
+  const end = input.selectionEnd ?? input.value.length;
+  input.value = `${input.value.slice(0, start)}${emoji}${input.value.slice(end)}`;
+  const cursor = start + emoji.length;
+  input.focus();
+  input.setSelectionRange(cursor, cursor);
+}
+
+async function recallChatMessage(id) {
+  if (!id || !window.confirm("确定撤回这条消息吗？")) return;
+  try {
+    await KitchenCloud.recallMessage(id);
+    await reloadCloudState();
+    toast("这条消息已撤回");
+  } catch (error) {
+    toast(friendlyCloudError(error));
   }
 }
 
@@ -825,6 +863,19 @@ window.addEventListener("focus", () => {
 document.getElementById("chat-toggle").addEventListener("click", () => setChatOpen(!chatOpen));
 document.getElementById("chat-close").addEventListener("click", () => setChatOpen(false));
 document.getElementById("chat-form").addEventListener("submit", sendChatMessage);
+document.getElementById("emoji-toggle").addEventListener("click", () => {
+  emojiOpen = !emojiOpen;
+  renderChat();
+});
+document.getElementById("emoji-picker").addEventListener("click", event => {
+  const button = event.target.closest("[data-emoji]");
+  if (!button) return;
+  insertChatEmoji(button.dataset.emoji);
+});
+document.getElementById("chat-messages").addEventListener("click", event => {
+  const button = event.target.closest("[data-recall-id]");
+  if (button) recallChatMessage(button.dataset.recallId);
+});
 
 renderAll();
 initializeCloud();

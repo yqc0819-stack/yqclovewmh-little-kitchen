@@ -213,9 +213,11 @@
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty"><span>♡</span><p>说句话吧，今晚吃饭也要有点仪式感。</p></div>
     </div>
+    <div class="emoji-picker hidden" id="emoji-picker" aria-label="选择小表情"></div>
     <form class="chat-form" id="chat-form">
+      <button class="emoji-toggle" id="emoji-toggle" type="button" aria-label="打开小表情" aria-expanded="false">☺</button>
       <input id="chat-input" name="message" maxlength="500" autocomplete="off" placeholder="比如：我晚十分钟到家">
-      <button type="submit">发送</button>
+      <button class="chat-send" type="submit">发送</button>
     </form>
   </aside>
 
@@ -239,7 +241,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260703-3"></script>
   <script src="state-helpers.js"></script>
-  <script src="cloud-adapter.js?v=20260703-9"></script>
-  <script src="app.js?v=20260703-9"></script>
+  <script src="cloud-adapter.js?v=20260704-10"></script>
+  <script src="app.js?v=20260704-10"></script>
 </body>
 </html>

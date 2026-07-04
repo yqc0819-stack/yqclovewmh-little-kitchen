@@ -266,10 +266,18 @@ dialog::backdrop { background:rgba(31,39,34,.42); backdrop-filter:blur(4px); }
 .chat-message.mine .chat-meta { justify-content:flex-end; }
 .chat-bubble { margin:0; padding:10px 12px; border-radius:16px 16px 16px 5px; background:#f0e8dc; color:#44352c; font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
 .chat-message.mine .chat-bubble { border-radius:16px 16px 5px 16px; background:#dcebdc; }
-.chat-form { display:grid; grid-template-columns:1fr auto; gap:8px; padding-top:10px; border-top:1px dashed #e5cdbb; }
+.chat-recalled { margin:0; padding:8px 12px; border:1px dashed #d9c9bb; border-radius:99px; color:#a08f82; font-size:10px; font-style:italic; background:rgba(255,255,255,.55); }
+.chat-recall { margin:3px 6px 0; padding:0; border:0; background:transparent; color:#ad7965; font-size:9px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+.chat-message.mine .chat-recall { display:block; margin-left:auto; }
+.emoji-picker { position:absolute; left:20px; right:20px; bottom:72px; z-index:2; display:grid; grid-template-columns:repeat(7,1fr); gap:5px; padding:11px; border:2px solid #ead7c6; border-radius:18px 15px 19px 14px; background:#fffdf8; box-shadow:0 12px 28px rgba(76,51,34,.18); }
+.emoji-picker button { height:36px; border:0; border-radius:10px; background:transparent; cursor:pointer; font-size:22px; }
+.emoji-picker button:hover { background:#fff0d8; transform:scale(1.12); }
+.chat-form { display:grid; grid-template-columns:auto 1fr auto; gap:8px; padding-top:10px; border-top:1px dashed #e5cdbb; }
 .chat-form input { min-width:0; padding:11px 13px; border:1px solid #dfcbbb; border-radius:14px; outline:none; background:white; }
 .chat-form input:focus { border-color:#6b9c7c; box-shadow:0 0 0 3px rgba(107,156,124,.13); }
-.chat-form button { border:0; border-radius:13px; padding:0 16px; background:var(--green); color:white; cursor:pointer; }
+.chat-form button { border:0; border-radius:13px; cursor:pointer; }
+.chat-form .emoji-toggle { width:42px; padding:0; background:#f4e7d6; color:#8e674f; font-size:23px; }
+.chat-form .chat-send { padding:0 16px; background:var(--green); color:white; }
 .chat-form button:disabled,.chat-form input:disabled { opacity:.5; cursor:not-allowed; }
 #library-dialog { width:min(680px,calc(100vw - 30px)); }
 .library-manage { padding:28px; }
