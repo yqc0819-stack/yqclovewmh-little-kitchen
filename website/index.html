@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fbf7ef">
+  <title>我们的小厨房</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="回到首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44"><path d="M12 17c0-5 4-9 10-9s10 4 10 9v2h2a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-1v9H11v-9h-1a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3h2v-2Z"/><path d="M17 8V5m10 3V5M11 31h22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </span>
+      <span><strong>我们的小厨房</strong><small>想吃什么，直接选。</small></span>
+    </a>
+    <div class="view-switch" role="tablist" aria-label="切换使用身份">
+      <button class="switch-btn active" data-view="diner" role="tab">点餐端</button>
+      <button class="switch-btn" data-view="admin" role="tab">管理端</button>
+    </div>
+    <div class="header-actions">
+      <span class="cloud-status" id="cloud-status">本地模式</span>
+      <button class="logout-btn hidden" id="logout-btn" type="button">退出</button>
+      <button class="icon-btn notification-btn" aria-label="查看提醒">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="notification-dot hidden"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section id="diner-view" class="app-view active">
+      <div class="hero">
+        <div class="hero-copy-wrap">
+          <p class="eyebrow"><span></span><span id="today-label"></span></p>
+          <h1>今晚，一起<br>好好吃饭。</h1>
+          <p class="hero-copy">灶上有热气，桌边有你。挑几道喜欢的，我来把晚餐变出来。</p>
+          <span class="hero-note">今日厨房已开火 <b>♡</b></span>
+          <span class="hero-sticker">两个人的晚餐日记</span>
+        </div>
+      </div>
+
+      <section id="progress-card" class="progress-card" aria-label="做饭进度">
+        <div class="progress-copy">
+          <span class="status-icon">✓</span>
+          <div><p>当前进度</p><strong id="diner-status">菜单等你来选</strong></div>
+        </div>
+        <div class="progress-track">
+          <span class="progress-line"></span>
+          <span class="progress-step active" data-step="0"></span>
+          <span class="progress-step" data-step="1"></span>
+          <span class="progress-step" data-step="2"></span>
+          <span class="progress-step" data-step="3"></span>
+        </div>
+        <span class="status-time" id="status-time">今天</span>
+      </section>
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">TODAY'S MENU</p>
+          <h2>今天想吃哪几道呀？</h2>
+        </div>
+        <p id="dish-count"></p>
+      </div>
+
+      <div class="menu-browser">
+        <aside class="category-tabs diner-category-tabs" id="diner-categories" aria-label="菜品分类"></aside>
+        <div class="menu-content">
+          <div id="menu-empty" class="empty-state hidden">
+            <span>🍲</span>
+            <h3>今天的菜单还在准备中</h3>
+            <p>等做饭的人发布后，就可以来挑喜欢的菜啦。</p>
+          </div>
+          <div class="dish-grid" id="diner-dish-grid"></div>
+        </div>
+      </div>
+
+      <section class="note-section" id="note-section">
+        <label for="taste-note">还有什么想说的？</label>
+        <div class="note-wrap">
+          <textarea id="taste-note" maxlength="100" placeholder="比如：少辣、不要香菜、米饭少一点…"></textarea>
+          <span><b id="note-count">0</b>/100</span>
+        </div>
+        <div class="quick-notes">
+          <span>快捷备注</span>
+          <button>少辣</button><button>不要香菜</button><button>米饭少一点</button>
+        </div>
+      </section>
+
+      <div class="submit-bar" id="submit-bar">
+        <p><span aria-hidden="true">🧺</span> 已经选了 <strong id="selected-count">0</strong> 道</p>
+        <button class="primary-btn" id="submit-choice" disabled>我选好了 <span>→</span></button>
+      </div>
+
+      <section class="history-section">
+        <div class="section-heading compact">
+          <div><p class="eyebrow">OUR MEMORIES</p><h2>最近吃过</h2></div>
+          <button class="text-btn" id="show-all-history">查看全部 <span>→</span></button>
+        </div>
+        <div class="history-list" id="diner-history"></div>
+      </section>
+    </section>
+
+    <section id="admin-view" class="app-view">
+      <div class="admin-heading">
+        <div><p class="eyebrow"><span></span> 管理端</p><h1>今天做点什么？</h1><p>挑好今天能做的菜，发布给家里的那位。</p></div>
+        <button class="secondary-btn" id="copy-link">复制点餐链接 <span>↗</span></button>
+      </div>
+
+      <div class="admin-layout">
+        <div class="admin-main">
+          <section class="panel result-panel" id="latest-result">
+            <div class="panel-title">
+              <div><p class="eyebrow">LATEST CHOICE</p><h2>对方的选择</h2></div>
+              <span class="pill neutral" id="result-status">还未提交</span>
+            </div>
+            <div id="result-content" class="result-empty">
+              <span>♡</span><p>发布菜单后，对方选好的菜会出现在这里。</p>
+            </div>
+            <div class="status-actions hidden" id="status-actions">
+              <button data-status="seen">已看到</button>
+              <button data-status="preparing">开始准备啦</button>
+              <button data-status="done">饭菜做好啦</button>
+            </div>
+          </section>
+
+          <section class="panel publish-panel">
+            <div class="panel-title">
+              <div><p class="eyebrow">PUBLISH</p><h2>发布今日菜单</h2></div>
+              <p id="admin-select-count">已选 0 道</p>
+            </div>
+            <div class="category-tabs" id="admin-categories"></div>
+            <div class="admin-dish-grid" id="admin-dish-grid"></div>
+            <button class="primary-btn wide" id="publish-menu">发布今日菜单 <span>→</span></button>
+          </section>
+        </div>
+
+        <aside class="admin-side">
+          <section class="panel library-panel">
+            <div class="panel-title">
+              <div><p class="eyebrow">DISH LIBRARY</p><h2>家庭菜品库</h2></div>
+              <button class="round-add" id="open-add-dish" aria-label="添加菜品">＋</button>
+            </div>
+            <p><b id="library-count">0</b> 道家常菜，随时可以加入今日菜单。</p>
+            <div class="mini-dishes" id="mini-dishes"></div>
+            <button class="outline-btn wide" id="manage-library">管理全部菜品</button>
+          </section>
+
+          <section class="panel history-panel">
+            <div class="panel-title">
+              <div><p class="eyebrow">HISTORY</p><h2>历史菜单</h2></div>
+            </div>
+            <div id="admin-history" class="admin-history-list"></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dish-dialog">
+    <form method="dialog" id="dish-form">
+      <input type="hidden" name="dishId">
+      <div class="dialog-head"><div><p class="eyebrow" id="dish-dialog-eyebrow">NEW DISH</p><h2 id="dish-dialog-title">添一道家常菜</h2></div><button type="button" class="dialog-close" id="dish-dialog-close" aria-label="关闭菜品编辑">×</button></div>
+      <label>菜品名称<input name="name" required maxlength="20" placeholder="比如：番茄炒蛋"></label>
+      <label>菜品照片
+        <span class="image-upload">
+          <input id="dish-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="upload-preview" id="upload-preview"><b>＋</b><small>点击上传家里的菜品照片</small></span>
+        </span>
+        <button type="button" class="remove-image-btn hidden" id="remove-dish-image">移除当前照片，改用表情</button>
+        <small class="field-hint">会自动压缩后保存在浏览器中，建议使用清晰的横图。</small>
+      </label>
+      <div class="form-row">
+        <label>分类<select name="category"><option>荤菜</option><option>素菜</option><option>汤类</option><option>主食</option><option>甜品</option></select></label>
+        <label>没有照片时显示<input name="emoji" maxlength="4" placeholder="🍳"></label>
+      </div>
+      <label>简单说明<textarea name="description" maxlength="50" placeholder="写一句让人有食欲的介绍"></textarea></label>
+      <button class="primary-btn wide" id="dish-form-submit" value="default" type="submit">保存到菜品库</button>
+    </form>
+  </dialog>
+
+  <dialog id="library-dialog">
+    <div class="library-manage">
+      <div class="dialog-head">
+        <div><p class="eyebrow">DISH LIBRARY</p><h2>管理家庭菜品库</h2></div>
+        <button type="button" class="dialog-close" id="library-dialog-close" aria-label="关闭菜品管理">×</button>
+      </div>
+      <div class="library-manage-summary">
+        <span>一共有 <b id="manage-dish-count">0</b> 道家常菜</span>
+        <small>删除后，也会从今日菜单和历史引用中移除。</small>
+      </div>
+      <div class="library-manage-list" id="library-manage-list"></div>
+      <button class="primary-btn wide library-add-another" id="library-add-another" type="button">＋ 再添一道新菜</button>
+    </div>
+  </dialog>
+
+  <button class="chat-fab hidden" id="chat-toggle" type="button" aria-label="打开家庭对话" aria-expanded="false">
+    <span aria-hidden="true">💬</span>
+    <i class="chat-unread hidden" id="chat-unread"></i>
+  </button>
+
+  <aside class="chat-panel hidden" id="chat-panel" aria-label="家庭实时对话">
+    <div class="chat-head">
+      <div><p class="eyebrow">FAMILY CHAT</p><h2>厨房悄悄话</h2></div>
+      <button class="chat-close" id="chat-close" type="button" aria-label="关闭家庭对话">×</button>
+    </div>
+    <p class="chat-setup hidden" id="chat-setup">聊天功能尚未启用，请先在 Supabase 运行 chat-upgrade.sql。</p>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-empty"><span>♡</span><p>说句话吧，今晚吃饭也要有点仪式感。</p></div>
+    </div>
+    <div class="emoji-picker hidden" id="emoji-picker" aria-label="选择小表情"></div>
+    <form class="chat-form" id="chat-form">
+      <button class="emoji-toggle" id="emoji-toggle" type="button" aria-label="打开小表情" aria-expanded="false">☺</button>
+      <input id="chat-input" name="message" maxlength="500" autocomplete="off" placeholder="比如：我晚十分钟到家">
+      <button class="chat-send" type="submit">发送</button>
+    </form>
+  </aside>
+
+  <div class="auth-screen hidden" id="auth-screen">
+    <div class="auth-card">
+      <span class="auth-mascot" aria-hidden="true">🍳</span>
+      <p class="eyebrow">WELCOME HOME</p>
+      <h2>回到我们的小厨房</h2>
+      <p class="auth-copy">用 Supabase 中创建的家庭账号登录，两台手机就能看到同一份菜单。</p>
+      <form id="login-form">
+        <label>登录邮箱<input type="email" name="email" autocomplete="username" required placeholder="请输入做饭人或点餐人邮箱"></label>
+        <label>登录密码<input type="password" name="password" autocomplete="current-password" required minlength="6" placeholder="请输入登录密码（至少 6 位）"></label>
+        <p class="auth-error hidden" id="auth-error"></p>
+        <button class="primary-btn wide" id="login-btn" type="submit">进入小厨房</button>
+      </form>
+      <small>账号需先在 Supabase Authentication → Users 中创建，并在 profiles 表绑定家庭身份。</small>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"><span>✓</span><p></p></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=20260703-3"></script>
+  <script src="state-helpers.js"></script>
+  <script src="cloud-adapter.js?v=20260704-10"></script>
+  <script src="app.js?v=20260704-10"></script>
+</body>
+</html>

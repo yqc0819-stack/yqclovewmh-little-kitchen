@@ -1,5 +1,6 @@
-assets/anime-kitchen-hero.png
-assets/chibi-kitchen-hero-v2.png
+website/assets/anime-kitchen-hero.png
+website/assets/chibi-kitchen-hero-v2.png
 .env
 .env.*
 !.env.example
+documents/我们的小厨房-从规划到双手机上线完整教程.md

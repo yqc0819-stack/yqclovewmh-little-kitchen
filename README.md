@@ -4,13 +4,19 @@
 
 ## 运行
 
-直接双击 `index.html` 即可使用。也可以在 PowerShell 中运行：
+直接双击根目录的 `index.html` 即可使用。也可以在 PowerShell 中运行：
 
 ```powershell
-.\preview.ps1
+.\website\preview.ps1
 ```
 
 然后打开 `http://127.0.0.1:4173`。
+
+## 目录
+
+- `website/`：网页源码、图片、Supabase SQL 和测试脚本
+- `documents/`：部署教程、接入说明和测试报告
+- 根目录 `index.html`：保持 GitHub Pages 原网址不变的入口
 
 ## 已实现
 
@@ -27,4 +33,4 @@
 
 当前版本已经配置 Supabase 云端适配：登录后使用数据库、Storage 与 Realtime；云端组件加载失败或尚未登录时，原有本地数据仍作为界面预览兜底。
 
-完全从零开始请阅读 [零基础双人上线教程.md](./零基础双人上线教程.md)；已有开发经验可查看 [双人在线部署教程.md](./双人在线部署教程.md)。
+完全从零开始请阅读 [零基础双人上线教程.md](./documents/零基础双人上线教程.md)；已有开发经验可查看 [双人在线部署教程.md](./documents/双人在线部署教程.md)。

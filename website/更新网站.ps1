@@ -1,8 +1,10 @@
 $ErrorActionPreference = "Stop"
-Set-Location -LiteralPath $PSScriptRoot
+$websiteRoot = $PSScriptRoot
+$projectRoot = Split-Path -Parent $websiteRoot
+Set-Location -LiteralPath $projectRoot
 
 Write-Host "1/4 正在检查小厨房功能..." -ForegroundColor Cyan
-$testSource = Get-Content -LiteralPath ".\tests\regression-check.ps1" -Raw -Encoding UTF8
+$testSource = Get-Content -LiteralPath ".\website\tests\regression-check.ps1" -Raw -Encoding UTF8
 Invoke-Expression $testSource
 
 $changes = git status --porcelain

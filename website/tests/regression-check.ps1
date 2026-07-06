@@ -1,5 +1,12 @@
 $ErrorActionPreference = "Stop"
-$root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Location).Path }
+$scriptParent = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { $null }
+$root = if ($scriptParent -and (Test-Path -LiteralPath (Join-Path $scriptParent "app.js"))) {
+    $scriptParent
+} elseif (Test-Path -LiteralPath (Join-Path (Get-Location).Path "website\app.js")) {
+    Join-Path (Get-Location).Path "website"
+} else {
+    (Get-Location).Path
+}
 $html = Get-Content -Raw -Encoding UTF8 (Join-Path $root "index.html")
 $app = Get-Content -Raw -Encoding UTF8 (Join-Path $root "app.js")
 $cloud = Get-Content -Raw -Encoding UTF8 (Join-Path $root "cloud-adapter.js")
